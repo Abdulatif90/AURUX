@@ -6,6 +6,11 @@ import { Member } from '../../libs/dto/member/member';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
+import { MemberType } from '../../libs/enums/member.enum';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { MemberUpdate } from '../../libs/dto/member/member.update';
+import { ObjectId } from 'mongoose';
 
 @Resolver()
 export class MemberResolver {
@@ -24,21 +29,29 @@ export class MemberResolver {
 		return this.memberService.login(input)
     }
 
-    // Authorization: Authenticated Member
-    @UseGuards(AuthGuard)
-    @Mutation(() => String)
-    public async updateMember(@AuthMember('_id') memberId: string): Promise<String> {
-        console.log("Mutation: updateMember")
-        console.log("Member ID:", memberId);
-        return this.memberService.updateMember()
-    }
-
     @UseGuards(AuthGuard)
 	  @Query(() => String)
 	  public async checkAuth(@AuthMember('memberNick') memberNick: string): Promise<string> {
 		console.log('Query: checkAuth');
 		console.log('memberNick', memberNick)
 		return `Hi ${memberNick}`;
+	}
+    // Authorization: Authenticated Member with specific roles
+    @Roles(MemberType.USER, MemberType.AGENT)
+    @UseGuards(RolesGuard)
+    @Query(() => String)
+    public async checkAuthRoles(@AuthMember() authMember: Member): Promise<string> {
+		console.log('Query: checkAuthRoles');
+		return `Hi ${authMember.memberNick}, you are ${authMember.memberType} and your memberId is ${authMember._id}`;
+	}
+
+    // Authenticated only
+    @UseGuards(AuthGuard)
+    @Mutation(() => Member)
+    public async updateMember(@Args('input') input: MemberUpdate, @AuthMember('_id') memberId: ObjectId): Promise<Member> {
+		console.log('Mutation: updateMember');
+		delete input._id
+		return this.memberService.updateMember(memberId, input);
 	}
 
 
@@ -51,6 +64,9 @@ export class MemberResolver {
     /** ADMIN **/
 
   	// Authorization: ADMIN
+
+      @Roles(MemberType.ADMIN)
+      @UseGuards(AuthGuard)
       @Mutation(() => String)
       public async updateMemberByAdmin(): Promise<String> {
         console.log('Mutation: updateMemberByAdmin');
