@@ -21,17 +21,22 @@ export class MemberResolver {
 		}
     }
 
-    @Mutation(() => String)
+    @Mutation(() => Member)
     @UsePipes(ValidationPipe)
-	  public async login(@Args('input') input: LoginInput): Promise<String> {
-		try {
-			console.log('Mutation: login');
-			console.log('LoginInput', input);
-			return this.memberService.login();
-		} catch (err) {
-			console.log('ERROR on signup', err);
-			throw new InternalServerErrorException(err);
-		}
+    public async login(@Args('input') input: LoginInput): Promise<Member> {
+    try {
+      console.log('Mutation: login');
+      console.log('LoginInput', input);
+
+      const member = await this.memberService.login(input);
+      if (typeof member === 'string') {
+        throw new InternalServerErrorException('Login did not return a Member object');
+      }
+      return member;
+    } catch (err) {
+      console.log('ERROR on signup', err);
+      throw new InternalServerErrorException(err);
+    }
     }
 
 
