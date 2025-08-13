@@ -11,8 +11,8 @@ registerEnumType(MemberType, {
 
 export enum MemberStatus {
     ACTIVE = "ACTIVE",
-    BLOCK = "BLOCK",
-    DELETE = "DELETE"
+    BLOCKED = "BLOCKE",
+    DELETED = "DELETE",
 }
 
 registerEnumType(MemberStatus, {

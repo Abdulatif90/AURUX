@@ -6,13 +6,18 @@ import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { MemberStatus } from '../../libs/enums/member.enum';
 import { Message } from '../../libs/enums/common.enum';
 import { response } from 'express';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class MemberService {
-  constructor(@InjectModel('Member') private readonly memberModel: Model<Member>) {}
+  constructor(
+    @InjectModel('Member') private readonly memberModel: Model<Member>,
+    private readonly authService: AuthService,
+  ) {}
 
    public async signup(input: MemberInput): Promise<Member> {
 		// TODO: Hash expected
+    input.memberPassword = await this.authService.hashPassword(input.memberPassword);
 		try {
 			const result = await this.memberModel.create(input);
 			return result;
@@ -29,24 +34,26 @@ export class MemberService {
 		  .select('+memberPassword')
 		  .exec();
 
-		if (!response) {
-		  throw new InternalServerErrorException(Message.NO_MEMBER_NICK);
-		}
-
-		if (response.memberStatus === MemberStatus.DELETE) {
-		  throw new InternalServerErrorException(Message.NO_MEMBER_NICK);
-		} else if (response.memberStatus === MemberStatus.BLOCK) {
+		if (!response || response.memberStatus === MemberStatus.DELETED) {
+      throw new InternalServerErrorException(Message.NO_MEMBER_NICK);
+		} else if (response.memberStatus === MemberStatus.BLOCKED) {
 		  throw new InternalServerErrorException(Message.BLOCKED_USER);
 		}
 
-		// TODO: compare passwords
-		const isMatch = memberPassword === response.memberPassword;
+		if (!response.memberPassword) {
+	  throw new InternalServerErrorException(Message.NO_PASSWORD_FOUND);
+	}
+    // Compare the provided password with the stored hashed password
+	const isMatch = await this.authService
+  .comparePasswords(input.memberPassword, response.memberPassword);
+
 		if (!isMatch) {
 		  throw new InternalServerErrorException(Message.WRONG_PASSWORD);
 		}
 
 		return response;
 	  }
+  
 
     public async updateMember(): Promise<string> {
         return "updateMember executed"
@@ -56,3 +63,4 @@ export class MemberService {
         return "getMember executed"
     }
 }
+

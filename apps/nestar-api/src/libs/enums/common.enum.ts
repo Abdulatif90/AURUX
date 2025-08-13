@@ -10,6 +10,7 @@ export enum Message {
   USED_MEMBER_NICK_OR_PHONE = 'Already registered nick or phone number',
 	NO_MEMBER_NICK = 'No member with that nick or phone exists',
 	WRONG_PASSWORD = 'The password is invalid, please try again',
+  NO_PASSWORD_FOUND = 'No password found for this member',
 	NOT_AUTHENTICATED = 'You are not authenticated, please try again',
 	BLOCKED_USER = 'You have been blocked by admins. Please contact support',
 	TOKEN_NOT_EXIST = 'Bearer token is not provided',
