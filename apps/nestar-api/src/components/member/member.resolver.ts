@@ -3,6 +3,9 @@ import { MemberService } from './member.service';
 import { InternalServerErrorException, UsePipes, ValidationPipe } from '@nestjs/common';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { Member } from '../../libs/dto/member/member';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { AuthMember } from '../auth/decorators/authMember.decorator';
 
 @Resolver()
 export class MemberResolver {
@@ -21,12 +24,23 @@ export class MemberResolver {
 		return this.memberService.login(input)
     }
 
-
+    // Authorization: Authenticated Member
+    @UseGuards(AuthGuard)
     @Mutation(() => String)
-    public async updateMember(): Promise<String> {
+    public async updateMember(@AuthMember('_id') memberId: string): Promise<String> {
         console.log("Mutation: updateMember")
+        console.log("Member ID:", memberId);
         return this.memberService.updateMember()
     }
+
+    @UseGuards(AuthGuard)
+	  @Query(() => String)
+	  public async checkAuth(@AuthMember('memberNick') memberNick: string): Promise<string> {
+		console.log('Query: checkAuth');
+		console.log('memberNick', memberNick)
+		return `Hi ${memberNick}`;
+	}
+
 
     @Query(() => String)
         public async getMember(): Promise<String> {
