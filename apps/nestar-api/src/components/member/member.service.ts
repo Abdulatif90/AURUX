@@ -9,6 +9,8 @@ import { response } from 'express';
 import { AuthService } from '../auth/auth.service';
 import { ServerResponse } from 'http';
 
+
+
 @Injectable()
 export class MemberService {
   constructor(
@@ -52,17 +54,26 @@ export class MemberService {
 		if (!isMatch) {
 		  throw new InternalServerErrorException(Message.WRONG_PASSWORD);
 		}
-    response.accessToken = await this.authService.createToken(response);
+response.accessToken = await this.authService.createToken(response);
 		return response;
-	  }
+	}
+
+	public async updateMember(): Promise<string> {
+		return 'updateMember executed';
+	}
+
+	public async getMember(): Promise<string> {
+		return 'getMember executed';
+	}
+
+	/** ADMIN **/
 
 
-    public async updateMember(): Promise<string> {
-        return "updateMember executed"
-    }
+	public async updateMemberByAdmin(): Promise<string> {
+		return 'updateMemberByAdmin executed';
+	}
 
-    public async getMember(): Promise<string> {
-        return "getMember executed"
-    }
+	public async getAllMembersByAdmin(): Promise<string> {
+		return 'getAllMembersByAdmin executed';
+	}
 }
-
