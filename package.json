@@ -8,13 +8,13 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-  "start": "nest start nestar-api",
-  "start:nodemon": "nodemon --watch apps/nestar-api/src --exec \"nest start nestar-api\"",
+    "start": "nest start nestar-api",
+    "start:nodemon": "nodemon --watch apps/nestar-api/src --exec \"nest start nestar-api\"",
     "start:dev": "nest start nestar-batch --watch",
     "start:dev:batch": "nest start nestar-batch --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "NODE_ENV=production node dist/apps/nestar-api/main",
-   "start:prod:batch": "node dist/apps/nestar-batch/main",
+    "start:prod:batch": "node dist/apps/nestar-batch/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -46,6 +46,7 @@
     "mongoose": "^8.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
+    "uuid": "^11.1.0",
     "ws": "^8.14.2"
   },
   "devDependencies": {
