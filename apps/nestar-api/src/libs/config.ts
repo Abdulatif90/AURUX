@@ -9,4 +9,11 @@ export const availableAgentSorts = [
   'updatedAt',
   'memberLikes',
   'memberViews',
-  'memberRank' ]
+   'memberRank',]
+
+export const availableMemberSorts = [
+  'createdAt',
+  'updatedAt',
+  'memberLikes',
+  'memberViews',
+  ];
