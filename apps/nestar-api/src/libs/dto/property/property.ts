@@ -10,6 +10,10 @@ export class Property {
     @Field(() => String)
     _id:ObjectId;
 
+    @Field(() => PropertyStatus)
+    propertyStatus: PropertyStatus;
+
+
     @Field(()=> PropertyType)
     propertyType: PropertyType;
 
