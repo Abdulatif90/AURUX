@@ -83,7 +83,7 @@ export class PropertyResolver {
 	}
   @Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
-	@Query((returns) => Property)
+	@Mutation((returns) => Property)
 	public async updatePropertyByAdmin(
 		@Args('input') input: PropertyUpdate,
 	): Promise<Property> {
