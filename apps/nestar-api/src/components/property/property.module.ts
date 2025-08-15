@@ -6,7 +6,7 @@ import PropertySchema from '../../schemas/Property.model';
 import { AuthModule } from '../auth/auth.module';
 import { ViewModule } from '../view/view.module';
 import { MemberModule } from '../member/member.module';
-import { Member } from '../../libs/dto/member/member';
+import { LikeModule } from '../like/like.module';
 
 
 @Module({
@@ -18,6 +18,7 @@ import { Member } from '../../libs/dto/member/member';
     AuthModule,
     ViewModule,
     MemberModule,
+    LikeModule
   ],
    providers: [PropertyResolver, PropertyService],
    exports: [PropertyService],

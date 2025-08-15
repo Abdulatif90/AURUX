@@ -73,9 +73,11 @@ constructor(private readonly boardArticleService: BoardArticleService) {}
 	}
 
 	@Roles(MemberType.ADMIN)
+  @UseGuards(RolesGuard)
 	@Mutation((returns) => BoardArticle)
 	public async updateBoardArticleByAdmin(@Args('input') input: BoardArticleUpdate): Promise<BoardArticle> {
 		console.log('Query: updateBoardArticleByAdmin', input);
+    console.log('Mutation: updateBoardArticleByAdmin', input);
 		return await this.boardArticleService.updateBoardArticleByAdmin(input);
 	}
 
