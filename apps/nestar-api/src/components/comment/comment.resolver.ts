@@ -16,8 +16,6 @@ import { Comments, Comment } from '../../libs/dto/comment/comment';
 export class CommentResolver {
 	constructor(private readonly commentService: CommentService) {}
 
-	@UseGuards(AuthGuard)
-	@Mutation((returns) => Comment)
 	public async createComment(
 		@Args('input') input: CommentInput,
 		@AuthMember('_id') memberId: ObjectId,
@@ -40,7 +38,7 @@ export class CommentResolver {
 	@UseGuards(WithoutGuard)
 	@Query((returns) => Comments)
 	public async getComments(
-		@Args('commentId') input: CommentsInquiry,
+		@Args('input') input: CommentsInquiry,
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Comments> {
 		console.log('Query: getComments');
