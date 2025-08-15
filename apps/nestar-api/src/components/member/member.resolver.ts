@@ -72,8 +72,8 @@ export class MemberResolver {
     console.log('Query: getAgents');
     return await this.memberService.getAgents(memberId, input);
 	}
-  
-  @UseGuards(WithoutGuard)
+
+  @UseGuards(AuthGuard)
 	@Mutation(() => Member)
 	public async likeTargetMember(
 		@Args('memberId') input: string,
