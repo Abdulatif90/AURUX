@@ -48,7 +48,7 @@ export const availableCommentSorts = ['createdAt', 'updatedAt'];
 	 return uuidv4() + ext;
  };
 
-// COMPLEX AGGREGATION
+// COMPLEX QUERY LOOKUPS
 
 export const lookupAuthMemberLiked = (memberId: T, targetRefId: string = '$_id') => {
 	return {

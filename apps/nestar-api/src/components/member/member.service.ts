@@ -16,6 +16,7 @@ import { ViewGroup } from '../../libs/enums/view.enum';
 import { AuthService } from '../auth/auth.service';
 import { ViewService } from   '../view/view.service';
 import { LikeService } from '../like/like.service';
+import { lookupAuthMemberLiked } from '../../libs/config';
 
 
 
@@ -128,7 +129,10 @@ export class MemberService {
 				{ $sort: sort },
 				{
 					$facet: {
-						list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+						list: [{
+              $skip: (input.page - 1) * input.limit },
+              { $limit: input.limit },
+              lookupAuthMemberLiked(memberId)],
 						metaCounter: [{ $count: 'total' }],
 					},
 				},
