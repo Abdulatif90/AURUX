@@ -80,7 +80,14 @@ export class Member {
 
   @Field(() => String, { nullable: true })
   accessToken?: string;
+
+  /** from aggregation **/
+
+	@Field(() => Member, { nullable: true })
+	memberData?: Member;
 }
+
+
 
 @ObjectType()
 export class TotalCounter {
