@@ -42,7 +42,11 @@ export class CommentResolver {
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Comments> {
 		console.log('Query: getComments');
-		input.search.commentRefId = shapeIntoMongoObjectId(input.search.commentRefId);
+		// Ensure input.search and input.search.commentRefId are defined before modifying
+		if (input.search && input.search.commentRefId) {
+			input.search.commentRefId = shapeIntoMongoObjectId(input.search.commentRefId);
+		}
+
 		const result = await this.commentService.getComments(memberId, input);
 		return result;
 	}

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { AgentsPropertiesInquiry,
+import { AgentPropertiesInquiry,
         AllPropertiesInquiry,
         PropertiesInquiry,
         PropertyInput,
@@ -160,10 +160,10 @@ export class PropertyService {
 			text,
 		} = input.search;
 		if (memberId) match.memberId = shapeIntoMongoObjectId(memberId);
-		if (locationList) match.propertyLocation = { $in: locationList };
-		if (roomsList) match.propertyRooms = { $in: roomsList };
-		if (bedsList) match.propertyBeds = { $in: bedsList };
-		if (typeList) match.propertyType = { $in: typeList };
+		if (locationList && locationList.length) match.propertyLocation = { $in: locationList };
+		if (roomsList && roomsList.length) match.propertyRooms = { $in: roomsList };
+		if (bedsList && bedsList.length) match.propertyBeds = { $in: bedsList };
+		if (typeList && typeList.length) match.propertyType = { $in: typeList };
 
 		if (pricesRange) match.propertyPrice = { $gte: pricesRange.start, $lte: pricesRange.end };
 		if (periodsRange) match.createdAt = { $gte: periodsRange.start, $lte: periodsRange.end };
@@ -187,9 +187,9 @@ export class PropertyService {
 		public async getVisited(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
 			return await this,this.viewService.getVisitedProperties(memberId, input)
 		}
-	
 
-  public async getAgentsProperties(memberId: ObjectId, input: AgentsPropertiesInquiry): Promise<Properties> {
+
+  public async getAgentProperties(memberId: ObjectId, input: AgentPropertiesInquiry): Promise<Properties> {
 		const { propertyStatus } = input.search;
 		if (propertyStatus === PropertyStatus.DELETE) throw new InternalServerErrorException(Message.NOT_ALLOWED_REQUEST);
 

@@ -7,11 +7,12 @@ export const shapeIntoMongoObjectId = (target: any) => {
 };
 
 export const availableAgentSorts = [
+  'memberRank',
   'createdAt',
   'updatedAt',
   'memberLikes',
   'memberViews',
-   'memberRank',]
+]
 
 export const availableMemberSorts = [
   'createdAt',
