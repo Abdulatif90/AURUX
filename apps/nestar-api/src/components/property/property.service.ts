@@ -183,6 +183,12 @@ export class PropertyService {
 	}
 
 
+  // getVisited
+		public async getVisited(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
+			return await this,this.viewService.getVisitedProperties(memberId, input)
+		}
+	
+
   public async getAgentsProperties(memberId: ObjectId, input: AgentsPropertiesInquiry): Promise<Properties> {
 		const { propertyStatus } = input.search;
 		if (propertyStatus === PropertyStatus.DELETE) throw new InternalServerErrorException(Message.NOT_ALLOWED_REQUEST);
