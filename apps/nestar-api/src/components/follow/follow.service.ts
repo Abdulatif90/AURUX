@@ -28,24 +28,12 @@ export class FollowService {
     const targetMember = await this.memberService.getMember(null, followingId);
     if (!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-    let result: Follower;
-    try {
-        result = await this.registerSubscription(followerId, followingId);
-    } catch (err) {
-        console.log('ERROR on registerSubscription', err.message);
-        throw new InternalServerErrorException(Message.CREATE_FAILED);
-    }
+    		const result = await this.registerSubscription(followerId, followingId);
 
-    try {
         await this.memberService.memberStatsEditor({ _id: followingId, targetKey: 'memberFollowings', modifier: 1 });
         await this.memberService.memberStatsEditor({ _id: followerId, targetKey: 'memberFollowers', modifier: 1 });
-    } catch (err) {
-        // Handle the error, possibly log it
-        console.error('Error updating member stats:', err.message);
-        // Revert the subscription if stats update fails
-        await this.followModel.deleteOne({ followingId: followingId, followerId: followerId });
-        throw new InternalServerErrorException('Failed to update stats, subscription reverted');
-    }
+
+        if (!result) throw new InternalServerErrorException(Message.CREATE_FAILED);
 
     return result;
   }
@@ -68,34 +56,23 @@ export class FollowService {
     const targetMember = await this.memberService.getMember(null, followingId);
     if (!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-    let result: any;
-    try {
-        result = await this.followModel.findOneAndDelete({
+    const result = await this.followModel.findOneAndDelete({
             followingId: followingId,
             followerId: followerId,
-        });
-    } catch (err) {
-        console.error('Error deleting subscription', err.message);
-        throw new InternalServerErrorException('Failed to delete subscription');
-    }
+        })
+    .exec();
 
     if (!result) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-    try {
         await this.memberService.memberStatsEditor({ _id: followingId, targetKey: 'memberFollowings', modifier: -1 });
         await this.memberService.memberStatsEditor({ _id: followerId, targetKey: 'memberFollowers', modifier: -1 });
-    } catch (err) {
-        console.error('Error updating member stats:', err.message);
-        // Attempt to recreate the subscription if stats update fails
-        await this.registerSubscription(followerId, followingId);
-        throw new InternalServerErrorException('Failed to update stats, subscription reverted');
-    }
 
-    return result;
+        return result;
   }
 
-  // getMemberFollowings
-  public async getMemberFollowings(memberId: ObjectId, input: FollowInquiry): Promise<Followings> {
+    // getMemberFollowings
+
+    public async getMemberFollowings(memberId: ObjectId, input: FollowInquiry): Promise<Followings> {
     const { page, limit, search } = input;
     if (!search?.followerId) throw new InternalServerErrorException(Message.BAD_REQUEST);
     const match: T = { followerId: search.followerId };
