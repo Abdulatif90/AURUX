@@ -27,22 +27,22 @@ export class NestarBatchController {
 	}
 
 	@Cron('20 * * * * *', { name: BATCH_TOP_PROPERTIES })
-	public async batchProperties() {
+	public async batchTopProperties() {
 		try {
 			this.logger['context'] = BATCH_TOP_PROPERTIES;
 			this.logger.debug('EXECTUTED');
-			await this.nestarBatchService.batchProperties();
+			await this.nestarBatchService.batchTopProperties();
 		} catch (err) {
 			this.logger.error(err);
 		}
 	}
 
 	@Cron('40 * * * * *', { name: BATCH_TOP_AGENTS })
-	public async batchAgents() {
+	public async batchTopAgents() {
 		try {
 			this.logger['context'] = BATCH_TOP_AGENTS;
 			this.logger.debug('EXECTUTED');
-			await this.nestarBatchService.batchAgents();
+			await this.nestarBatchService.batchTopAgents();
 		} catch (err) {
 			this.logger.error(err);
 		}
