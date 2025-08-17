@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException  } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException  } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { MemberService } from '../member/member.service';
-import { Follower, Following,Followers, Followings } from '../../libs/dto/follow/follow';
+import { Follower,Followers, Following, Followings } from '../../libs/dto/follow/follow';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { FollowInquiry } from '../../libs/dto/follow/follow.input';
 import { T } from '../../libs/types/common';
@@ -47,7 +47,7 @@ export class FollowService {
       });
     } catch (err) {
       console.log('ERROR on registerSubscription', err.message);
-      throw new InternalServerErrorException(Message.CREATE_FAILED);
+      throw new BadRequestException(Message.CREATE_FAILED);
     }
   }
 
@@ -88,7 +88,7 @@ export class FollowService {
               { $skip: (page - 1) * limit },
               { $limit: limit },
               lookupAuthMemberLiked(memberId, '$followingId'),
-              lookupAuthMemberFollowed({ followerId: memberId, followingId: '$followingId' }),
+              lookupAuthMemberFollowed(memberId, '$followingId'),
               lookupFollowingData,
               { $unwind: { path: '$followingData' } },
             ],
@@ -120,7 +120,7 @@ export class FollowService {
               { $skip: (page - 1) * limit },
               { $limit: limit },
               lookupAuthMemberLiked(memberId, '$followerId'),
-              lookupAuthMemberFollowed({ followerId: memberId, followingId: '$followerId' }),
+              lookupAuthMemberFollowed(memberId, '$followerId'),
               lookupFollowerData,
               { $unwind: { path: '$followerData' } },
             ],

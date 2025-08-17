@@ -4,7 +4,7 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { Follower, Followers ,Followings } from '../../libs/dto/follow/follow';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
-import { ObjectId, Types } from 'mongoose';
+import { ObjectId } from 'mongoose';
 import { shapeIntoMongoObjectId } from '../../libs/config';
 import { WithoutGuard } from '../auth/guards/without.guard';
 import { FollowInquiry } from '../../libs/dto/follow/follow.input'
@@ -35,11 +35,7 @@ export class FollowResolver {
 	@Query(() => Followings)
 	public async getMemberFollowings(@Args('input') input: FollowInquiry, @AuthMember('_id') memberId: ObjectId): Promise<Followings> {
 		console.log('Query: getMemberFollowings');
-    const { followerId } = input.search ?? {};
-   if (!followerId || !Types.ObjectId.isValid(followerId.toString())) {
-      throw new Error('Invalid followerId');
-    }
-
+    const { followerId } = input.search
 		input.search.followerId = shapeIntoMongoObjectId(followerId);
 		return await this.followService.getMemberFollowings(memberId, input);
 	}
@@ -51,12 +47,8 @@ export class FollowResolver {
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Followers> {
 		console.log('Query: getMemberFollowers');
-		const { followingId } = input.search ?? {};
-    if (!followingId || !Types.ObjectId.isValid(followingId.toString())) {
-      throw new Error('Invalid followingId');
-    }
-
-		input.search.followingId = shapeIntoMongoObjectId(followingId);
+		const { followingId } = input.search
+    input.search.followingId = shapeIntoMongoObjectId(followingId);
 		return await this.followService.getMemberFollowers(memberId, input);
 	}
 }
