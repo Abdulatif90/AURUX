@@ -1,0 +1,30 @@
+import { registerEnumType } from '@nestjs/graphql';
+
+export enum Message {
+	SOMETHING_WENT_WRONG = 'Something went wrong!',
+	NO_DATA_FOUND = 'No data found!',
+	CREATE_FAILED = 'Create is failed',
+	UPDATE_FAILED = 'Update is failed',
+	REMOVE_FAILED = 'Remove is failed',
+	UPLOAD_FAILED = 'Upload is failed',
+	BAD_REQUEST = 'Bad Request',
+
+  USED_MEMBER_NICK_OR_PHONE = 'Already registered nick or phone number',
+	NO_MEMBER_NICK = 'No member with that nick or phone exists',
+	WRONG_PASSWORD = 'The password is invalid, please try again',
+  NO_PASSWORD_FOUND = 'No password found for this member',
+	NOT_AUTHENTICATED = 'You are not authenticated, please try again',
+	BLOCKED_USER = 'You have been blocked by admins. Please contact support',
+	TOKEN_NOT_EXIST = 'Bearer token is not provided',
+	ONLY_SPECIFIC_ROLES_ALLOWED = 'Allowed for members with specific roles',
+	NOT_ALLOWED_REQUEST = 'Not Allowed Request',
+	PROVIDE_ALLOWED_FORMAT = 'Please, provide jpg, jpeg and png formats',
+	SELF_SUBSCRIPTION_DENIED = 'Self subscription is denied',
+}
+
+
+export enum Direction {
+	ASC = 1,
+	DESC = -1,
+}
+registerEnumType(Direction, { name: 'Direction' });
