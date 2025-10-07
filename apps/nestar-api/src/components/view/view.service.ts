@@ -14,12 +14,12 @@ export class ViewService {
 	constructor(@InjectModel('View') private readonly viewModel: Model<View>) {}
 
 	public async recordView(input: ViewInput): Promise<View | null> {
-		console.log('ViewService.recordView called with:', { 
-			memberId: input.memberId, 
-			viewRefId: input.viewRefId, 
-			viewGroup: input.viewGroup 
+		console.log('ViewService.recordView called with:', {
+			memberId: input.memberId,
+			viewRefId: input.viewRefId,
+			viewGroup: input.viewGroup
 		});
-		
+
 		const viewExist = await this.checkViewExistence(input);
 		if (!viewExist) {
 			console.log(' - New View Insert - Creating new view record');
@@ -47,7 +47,7 @@ export class ViewService {
 	}
 
   // getVisitedProperties
-  
+
 	public async getVisitedProperties(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
 		const { page, limit } = input;
 		const match: T = { viewGroup: ViewGroup.PROPERTY, memberId: memberId };
