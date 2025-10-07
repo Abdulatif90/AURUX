@@ -92,10 +92,13 @@ export class MemberService {
 
     if (memberId) {
 			const viewInput = { memberId: memberId, viewRefId: targetId, viewGroup: ViewGroup.MEMBER };
+			console.log('Member view check for:', { memberId, targetId });
 			const newView = await this.viewService.recordView(viewInput);
 			if (newView) {
+				console.log('Incrementing member views for targetId:', targetId);
 				await this.memberModel.findOneAndUpdate(search, { $inc: { memberViews: 1 } }, { new: true }).exec();
 				targetMember.memberViews++;
+				console.log('Member view count updated to:', targetMember.memberViews);
 			}
 
     //meLiked

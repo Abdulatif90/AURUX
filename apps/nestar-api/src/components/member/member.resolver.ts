@@ -13,8 +13,9 @@ import { ObjectId } from 'mongoose';
 import { getSerialForImage, shapeIntoMongoObjectId, validMimeTypes } from '../../libs/config';
 import { WithoutGuard } from '../auth/guards/without.guard';
 import { Message } from '../../libs/enums/common.enum';
-import { createWriteStream } from 'fs';
+import { createWriteStream, mkdirSync, existsSync } from 'fs';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
+import * as path from 'path';
 
 @Resolver()
 export class MemberResolver {
@@ -114,21 +115,45 @@ export class MemberResolver {
     @Args('target') target: String,
     ): Promise<string> {
     console.log('Mutation: imageUploader');
+    console.log('Upload details:', { filename, mimetype, target });
 
     if (!filename) throw new BadRequestException(Message.UPLOAD_FAILED);
     const validMime = validMimeTypes.includes(mimetype);
     if (!validMime) throw new BadRequestException(Message.PROVIDE_ALLOWED_FORMAT);
 
     const imageName = getSerialForImage(filename);
-    const url = `uploads/${target}/${imageName}`;
+    const uploadDir = `uploads/${target}`;
+    const url = `${uploadDir}/${imageName}`;
+
+    // Create directory if it doesn't exist
+    try {
+      if (!existsSync(uploadDir)) {
+        mkdirSync(uploadDir, { recursive: true });
+        console.log('Created upload directory:', uploadDir);
+      }
+    } catch (dirError) {
+      console.error('Error creating directory:', dirError);
+      throw new BadRequestException(Message.UPLOAD_FAILED);
+    }
+
     const stream = createReadStream();
 
     const result = await new Promise((resolve, reject) => {
       stream
         .pipe(createWriteStream(url))
-        .on('finish', async () => resolve(true))
-        .on('error', () => reject(false));
+        .on('finish', async () => {
+          console.log('File uploaded successfully:', url);
+          resolve(true);
+        })
+        .on('error', (error) => {
+          console.error('Upload stream error:', error);
+          reject(new Error(`Upload failed: ${error.message}`));
+        });
+    }).catch((error) => {
+      console.error('Upload promise error:', error);
+      throw new BadRequestException(`Upload failed: ${error.message}`);
     });
+
     if (!result) throw new BadRequestException(Message.UPLOAD_FAILED);
 
     return url;
@@ -143,29 +168,54 @@ export class MemberResolver {
       console.log('Mutation: imagesUploader');
 
       const uploadedImages: string[] = [];
+      const uploadDir = `uploads/${target}`;
+
+      // Create directory if it doesn't exist
+      try {
+        if (!existsSync(uploadDir)) {
+          mkdirSync(uploadDir, { recursive: true });
+          console.log('Created upload directory:', uploadDir);
+        }
+      } catch (dirError) {
+        console.error('Error creating directory:', dirError);
+        throw new BadRequestException(Message.UPLOAD_FAILED);
+      }
+
       const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<void> => {
 
         try {
            const { filename, mimetype, encoding, createReadStream } = await img;
+           console.log(`Uploading file ${index + 1}:`, { filename, mimetype });
+
            const validMime = validMimeTypes.includes(mimetype);
           if (!validMime) throw new BadRequestException (Message.PROVIDE_ALLOWED_FORMAT);
 
           const imageName = getSerialForImage(filename);
-          const url = `uploads/${target}/${imageName}`;
+          const url = `${uploadDir}/${imageName}`;
           const stream = createReadStream();
 
           const result = await new Promise((resolve, reject) => {
             stream
               .pipe(createWriteStream(url))
-              .on('finish', () => resolve(true))
-              .on('error', () => reject(false));
+              .on('finish', () => {
+                console.log(`File ${index + 1} uploaded successfully:`, url);
+                resolve(true);
+              })
+              .on('error', (error) => {
+                console.error(`Upload error for file ${index + 1}:`, error);
+                reject(new Error(`Upload failed: ${error.message}`));
+              });
+          }).catch((error) => {
+            console.error(`Upload promise error for file ${index + 1}:`, error);
+            throw error;
           });
 
           if (!result) throw new BadRequestException (Message.UPLOAD_FAILED);
 
           uploadedImages[index] = url;
         } catch (err) {
-          console.log('Error, file missing!');
+          console.error(`Error uploading file ${index + 1}:`, err);
+          throw new BadRequestException(`File ${index + 1} upload failed: ${err.message}`);
         }
       });
 

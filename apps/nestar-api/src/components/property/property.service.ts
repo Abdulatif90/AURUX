@@ -52,10 +52,13 @@ export class PropertyService {
 
 		if (memberId) {
 			const viewInput = { memberId: memberId, viewRefId: propertyId, viewGroup: ViewGroup.PROPERTY };
+			console.log('Property view check for:', { memberId, propertyId });
 			const newView = await this.viewService.recordView(viewInput);
 			if (newView) {
+				console.log('Incrementing property views for propertyId:', propertyId);
 				await this.propertyStatsEditor({ _id: propertyId, targetKey: 'propertyViews', modifier: 1 });
 				targetProperty.propertyViews++;
+				console.log('Property view count updated to:', targetProperty.propertyViews);
 			}
 		}
 

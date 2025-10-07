@@ -14,23 +14,34 @@ export class ViewService {
 	constructor(@InjectModel('View') private readonly viewModel: Model<View>) {}
 
 	public async recordView(input: ViewInput): Promise<View | null> {
+		console.log('ViewService.recordView called with:', { 
+			memberId: input.memberId, 
+			viewRefId: input.viewRefId, 
+			viewGroup: input.viewGroup 
+		});
+		
 		const viewExist = await this.checkViewExistence(input);
 		if (!viewExist) {
-			console.log(' - New View Insert -');
+			console.log(' - New View Insert - Creating new view record');
 			const newViewData = {
 				...input,
 				memberId: new Types.ObjectId(input.memberId as any),
 				viewRefId: new Types.ObjectId(input.viewRefId as any),
 			};
-			return await this.viewModel.create(newViewData);
+			const newView = await this.viewModel.create(newViewData);
+			console.log(' - New View Created Successfully:', newView._id);
+			return newView;
+		} else {
+			console.log(' - View Already Exists - Skipping increment');
 		}
 		return null;
 	}
 	public async checkViewExistence(input: ViewInput): Promise<View | null> {
-		const { memberId, viewRefId } = input;
+		const { memberId, viewRefId, viewGroup } = input;
 		const search: T = {
 			memberId: new Types.ObjectId(memberId as any),
 			viewRefId: new Types.ObjectId(viewRefId as any),
+			viewGroup: viewGroup,
 		};
 		return await this.viewModel.findOne(search).exec();
 	}

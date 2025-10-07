@@ -47,10 +47,13 @@ export class BoardArticleService {
 
 		if (memberId) {
 			const viewInput = { memberId: memberId, viewRefId: articleId, viewGroup: ViewGroup.ARTICLE };
+			console.log('Article view check for:', { memberId, articleId });
 			const newView = await this.viewService.recordView(viewInput);
 			if (newView) {
+				console.log('Incrementing article views for articleId:', articleId);
 				await this.boardArticleStatsEditor({ _id: articleId, targetKey: 'articleViews', modifier: 1 });
 				targetBoardArticle.articleViews++;
+				console.log('Article view count updated to:', targetBoardArticle.articleViews);
 			}
 		}
 
