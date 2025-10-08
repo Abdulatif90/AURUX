@@ -20,7 +20,11 @@ async function bootstrap() {
 		maxFiles: 10
 	}));
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: false,
+    transform: true,
+  }));
   app.useGlobalInterceptors(new LoggingInterceptor())
 
 	// Serve static files from uploads directory

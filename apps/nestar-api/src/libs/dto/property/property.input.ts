@@ -12,9 +12,9 @@ export class PropertyInput {
 	@Field(() => PropertyType)
 	propertyType: PropertyType;
 
-  @IsNotEmpty()
-	@Field(() => PropertyStatus)
-	propertyStatus: PropertyStatus;
+  @IsOptional()
+	@Field(() => PropertyStatus, { nullable: true, defaultValue: PropertyStatus.ACTIVE })
+	propertyStatus?: PropertyStatus;
 
 	@IsNotEmpty()
 	@Field(() => PropertyLocation)

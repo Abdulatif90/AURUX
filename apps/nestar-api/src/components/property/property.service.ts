@@ -40,6 +40,12 @@ export class PropertyService {
 				throw new BadRequestException('Property images are required');
 			}
 
+			// Set default propertyStatus if not provided
+			if (!input.propertyStatus) {
+				input.propertyStatus = PropertyStatus.ACTIVE;
+				console.log('Setting default propertyStatus to ACTIVE');
+			}
+
 			const result: any = await this.propertyModel.create(input);
 			await this.memberService.memberStatsEditor({ _id: result.memberId, targetKey: 'memberProperties', modifier: 1 });
 			return result;
