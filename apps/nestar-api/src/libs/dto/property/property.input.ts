@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsIn, IsInt, IsNotEmpty, IsOptional, Length, Min } from 'class-validator';
+import { IsIn, IsInt, IsNotEmpty, IsOptional, Length, Min, IsArray, ArrayMinSize, ArrayMaxSize } from 'class-validator';
 import { PropertyLocation, PropertyStatus, PropertyType } from '../../enums/property.enum';
 import { availableOptions, availablePropertySorts } from '../../config';
 import { Direction } from '../../enums/common.enum';
@@ -51,6 +51,9 @@ export class PropertyInput {
 	propertyRooms: number;
 
 	@IsNotEmpty()
+	@IsArray()
+	@ArrayMinSize(1, { message: 'At least 1 property image is required' })
+	@ArrayMaxSize(5, { message: 'Maximum 5 property images allowed' })
 	@Field(() => [String])
 	propertyImages: string[];
 

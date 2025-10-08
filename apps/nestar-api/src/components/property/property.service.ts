@@ -33,11 +33,19 @@ export class PropertyService {
 
 	public async createProperty(input: PropertyInput): Promise<Property> {
 		try {
+			console.log('Creating property with input:', JSON.stringify(input, null, 2));
+			console.log('Property images count:', input.propertyImages?.length || 0);
+
+			if (!input.propertyImages || input.propertyImages.length === 0) {
+				throw new BadRequestException('Property images are required');
+			}
+
 			const result: any = await this.propertyModel.create(input);
 			await this.memberService.memberStatsEditor({ _id: result.memberId, targetKey: 'memberProperties', modifier: 1 });
 			return result;
 		} catch (err) {
-			console.log('ERROR on service Model of signup', err.message);
+			console.log('ERROR on service Model of createProperty:', err.message);
+			console.log('Full error:', err);
 			throw new BadRequestException(Message.CREATE_FAILED);
 		}
 	}

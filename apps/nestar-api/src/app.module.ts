@@ -18,6 +18,9 @@ import { SocketModule } from './socket/socket.module';
       playground: true,
       uploads: false,
       autoSchemaFile: true,
+      subscriptions: {
+        'graphql-ws': true,
+      },
       formatError: (error: T) => {
 				const graphqlFormattedError = {
 					code: error?.extensions.code,

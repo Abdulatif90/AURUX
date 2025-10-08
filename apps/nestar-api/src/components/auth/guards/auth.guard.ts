@@ -14,14 +14,24 @@ export class AuthGuard implements CanActivate {
 			//context.getArgByIndex(2) => the GraphQL context (includes request, response, etc.)
 
 			const bearerToken = request.headers.authorization;
-			if (!bearerToken) throw new BadRequestException(Message.TOKEN_NOT_EXIST);
+			if (!bearerToken) {
+				console.log('❌ No authorization token provided');
+				throw new BadRequestException(Message.TOKEN_NOT_EXIST);
+			}
 
-			console.log('bearerToken:', bearerToken);
-			const token = bearerToken.split(' ')[1], // Index 1 is token
-				authMember = await this.authService.verifyToken(token);
-			if (!authMember) throw new UnauthorizedException(Message.NOT_AUTHENTICATED);
+			const token = bearerToken.split(' ')[1]; // Index 1 is token
+			if (!token) {
+				console.log('❌ Invalid token format');
+				throw new BadRequestException(Message.TOKEN_NOT_EXIST);
+			}
 
-			console.log('memberNick[auth] =>', authMember.memberNick);
+			const authMember = await this.authService.verifyToken(token);
+			if (!authMember) {
+				console.log('❌ Token verification failed');
+				throw new UnauthorizedException(Message.NOT_AUTHENTICATED);
+			}
+
+			console.log('✅ Authentication successful for:', authMember.memberNick);
 			request.body.authMember = authMember;
 
 			return true;

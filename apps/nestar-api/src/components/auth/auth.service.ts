@@ -34,9 +34,14 @@ export class AuthService {
     return this.jwtService.signAsync(payload);
   }
   public async verifyToken (token: string): Promise<Member> {
-		const member = await this.jwtService.verifyAsync(token);
-    member._id = shapeIntoMongoObjectId(member._id);
-    console.log('Decoded member from token:', member);
-		return member;
+		try {
+			const member = await this.jwtService.verifyAsync(token);
+			member._id = shapeIntoMongoObjectId(member._id);
+			console.log('✅ Token verified successfully for:', member.memberNick);
+			return member;
+		} catch (error) {
+			console.log('❌ Token verification failed:', error.message);
+			return null;
+		}
 	}
 }

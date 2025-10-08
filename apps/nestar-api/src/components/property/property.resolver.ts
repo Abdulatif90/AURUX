@@ -24,7 +24,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 @Resolver()
 export class PropertyResolver {
   constructor ( private readonly propertyService: PropertyService) {}
-  @Roles(MemberType.AGENT)
+	@Roles(MemberType.AGENT)
 	@UseGuards(RolesGuard)
 	@Mutation(() => Property)
 	public async createProperty(
@@ -32,11 +32,11 @@ export class PropertyResolver {
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Property> {
 		console.log('Mutation: createProperty');
+		console.log('Input received:', JSON.stringify(input, null, 2));
+		console.log('Property images:', input.propertyImages);
 		input.memberId = memberId; // not coming from frontend, exists only in backend
 		return await this.propertyService.createProperty(input);
-	}
-
-	@UseGuards(WithoutGuard)
+	}	@UseGuards(WithoutGuard)
 	@Query((returns) => Property)
 	public async getProperty(
 		@Args('propertyId') input: string,

@@ -112,7 +112,7 @@ export class MemberResolver {
     public async imageUploader(
     @Args({ name: 'file', type: () => GraphQLUpload })
     { createReadStream, filename, mimetype }: FileUpload,
-    @Args('target') target: String,
+    @Args('target') target: string,
     ): Promise<string> {
     console.log('Mutation: imageUploader');
     console.log('Upload details:', { filename, mimetype, target });
@@ -163,9 +163,18 @@ export class MemberResolver {
     @Mutation((returns) => [String])
     public async imagesUploader(
       @Args('files', { type: () => [GraphQLUpload] }) files: Promise<FileUpload>[],
-      @Args('target') target: String,
+      @Args('target') target: string,
       ): Promise<string[]> {
       console.log('Mutation: imagesUploader');
+      console.log('Files count:', files?.length || 0);
+
+      if (!files || files.length === 0) {
+        throw new BadRequestException('At least one file is required');
+      }
+
+      if (files.length > 10) {
+        throw new BadRequestException('Maximum 10 files allowed');
+      }
 
       const uploadedImages: string[] = [];
       const uploadDir = `uploads/${target}`;
@@ -220,6 +229,8 @@ export class MemberResolver {
       });
 
         await Promise.all(promisedList);
+
+        console.log('All files uploaded successfully:', uploadedImages.length);
         return uploadedImages;
 }
 
