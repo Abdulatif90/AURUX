@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Member } from 'apps/nestar-api/src/libs/dto/member/member';
-import { Property } from 'apps/nestar-api/src/libs/dto/property/property';
+import { Member } from 'apps/aurux-api/src/libs/dto/member/member';
+import { Property } from 'apps/aurux-api/src/libs/dto/property/property';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { PropertyStatus } from 'apps/nestar-api/src/libs/enums/property.enum';
-import { MemberStatus, MemberType } from 'apps/nestar-api/src/libs/enums/member.enum';
+import { PropertyStatus } from 'apps/aurux-api/src/libs/enums/property.enum';
+import { MemberStatus, MemberType } from 'apps/aurux-api/src/libs/enums/member.enum';
 
 @Injectable()
 export class NestarBatchService {

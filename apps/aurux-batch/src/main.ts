@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { NestarBatchModule } from './nestar-batch.module';
+import { NestarBatchModule } from './aurux-batch.module';
 import 'dotenv/config';
 
 async function bootstrap() {

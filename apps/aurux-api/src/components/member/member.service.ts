@@ -4,7 +4,7 @@ import { InjectModel} from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { Member, Members } from  '../../libs/dto/member/member';
 import { Follower, Following } from '../../libs/dto/follow/follow';
-import { MeFollowed } from './../../libs/dto/follow/follow';
+import { MeFollowed } from '../../libs/dto/follow/follow';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { AgentsInquiry, LoginInput, MemberInput, MembersInquiry } from '../../libs/dto/member/member.input';

@@ -1,4 +1,4 @@
-import { MemberService } from './../member/member.service';
+import { MemberService } from '../member/member.service';
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';

@@ -1,5 +1,5 @@
 import { Controller, Get, Logger } from '@nestjs/common';
-import { NestarBatchService } from './nestar-batch.service';
+import { NestarBatchService } from './aurux-batch.service';
 import { Cron, Interval, Timeout } from '@nestjs/schedule';
 import { BATCH_ROLLBACK, BATCH_TOP_AGENTS, BATCH_TOP_PROPERTIES } from './lib/config'
 

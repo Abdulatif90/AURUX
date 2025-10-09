@@ -1,4 +1,4 @@
-import { PropertyService } from './../property/property.service';
+import { PropertyService } from '../property/property.service';
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
@@ -27,7 +27,7 @@ export class CommentService {
 		try {
 			result = await this.commentModel.create(input);
 		} catch (err) {
-		
+
 		}
 
 		switch (input.commentGroup) {
