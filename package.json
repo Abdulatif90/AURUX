@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build aurux-api && nest build aurux-batch",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start aurux-api",
     "start:nodemon": "nodemon --watch apps/aurux-api/src --exec \"nest start aurux-api\"",

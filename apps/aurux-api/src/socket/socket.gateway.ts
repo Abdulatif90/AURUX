@@ -13,13 +13,13 @@ import * as url from 'url';
 interface MessagePayload {
 	event: string;
 	text: string;
-  memberData: Member;
+  memberData: Member | null;
 }
 
 interface InfoPayload {
 	event: string;
 	totalClients: number;
-  memberData: Member;
+  memberData: Member | null;
 	action: string;
 }
 
@@ -27,7 +27,7 @@ interface InfoPayload {
 export class SocketGateway implements OnGatewayInit {
 	private logger: Logger = new Logger('SocketEventsGateAway');
 	private summaryClient: number = 0;
-  private clientsAuthMap = new Map<WebSocket, Member>();
+  private clientsAuthMap = new Map<WebSocket, Member | null>();
 	private messageList: MessagePayload[] = [];
 
 	constructor(private authService: AuthService) {}
@@ -39,7 +39,7 @@ export class SocketGateway implements OnGatewayInit {
 		this.logger.verbose(`Web Server Initialized & total: ${this.summaryClient}`);
 	}
 
-	private async retrieveAuth(req: any): Promise<Member> {
+	private async retrieveAuth(req: any): Promise<Member | null> {
 		try {
 			const parseUrl = url.parse(req.url, true);
 			const { token } = parseUrl.query;
@@ -61,7 +61,7 @@ export class SocketGateway implements OnGatewayInit {
 		const infoMsg: InfoPayload = {
 			event: 'info',
 			totalClients: this.summaryClient,
-      memberData: authMember,
+	  memberData: authMember ?? null,
 			action: 'connected',
 		};
 
@@ -79,7 +79,7 @@ export class SocketGateway implements OnGatewayInit {
 		const infoMsg: InfoPayload = {
 			event: 'info',
 			totalClients: this.summaryClient,
-      memberData: authMember,
+	  memberData: authMember ?? null,
 			action: 'disconnected',
 		};
 		this.broadCastMessage(client, infoMsg);
@@ -99,7 +99,7 @@ export class SocketGateway implements OnGatewayInit {
 		const newMessage: MessagePayload = {
 			event: 'message',
 			text: payload,
-      memberData: authMember,
+	  memberData: authMember ?? null,
 		};
 
     const clientNick: string = authMember ? authMember.memberNick : 'Guest';

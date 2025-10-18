@@ -33,7 +33,7 @@ export class AuthService {
 
     return this.jwtService.signAsync(payload);
   }
-  public async verifyToken (token: string): Promise<Member> {
+  public async verifyToken (token: string): Promise<Member| null> {
 		try {
 			const member = await this.jwtService.verifyAsync(token);
 			member._id = shapeIntoMongoObjectId(member._id);

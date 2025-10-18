@@ -58,3 +58,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Images
 uploads
+
+# Firebase
+docker-compose.yaml
+  
