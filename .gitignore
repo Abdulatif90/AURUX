@@ -61,4 +61,5 @@ uploads
 
 # Firebase
 docker-compose.yaml
-  
+
+  deploy.sh
