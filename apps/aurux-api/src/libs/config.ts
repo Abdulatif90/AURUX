@@ -6,6 +6,10 @@ export const shapeIntoMongoObjectId = (target: any) => {
 	return typeof target === 'string' ? new ObjectId(target) : target;
 };
 
+export const escapeRegExp = (text: string): string => {
+	return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 export const availableAgentSorts = [
   'memberRank',
   'createdAt',

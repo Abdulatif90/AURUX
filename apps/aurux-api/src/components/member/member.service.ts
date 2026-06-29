@@ -107,7 +107,7 @@ export class MemberService {
     const likeInput = { memberId: memberId, likeRefId: targetId, likeGroup: LikeGroup.MEMBER };
 			targetMember.meLiked = await this.likeService.checkLikeExistence(likeInput as LikeInput);
 			//meFollowed
-     targetMember.MeFollowed = await this.checkSubscription(memberId, targetId)
+     targetMember.meFollowed = await this.checkSubscription(memberId, targetId)
 
 		}
     return targetMember;
