@@ -1,5 +1,5 @@
 import { PropertyService } from '../property/property.service';
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { MemberService } from '../member/member.service';
@@ -14,6 +14,8 @@ import { lookupMember } from '../../libs/config';
 
 @Injectable()
 export class CommentService {
+	private readonly logger = new Logger(CommentService.name);
+
 	constructor(
 		@InjectModel('Comment') private readonly commentModel: Model<Comment>,
 		private readonly memberService: MemberService,
@@ -23,11 +25,12 @@ export class CommentService {
 
 	public async createComment(memberId: ObjectId, input: CommentInput): Promise<Comment> {
 		input.memberId = memberId;
-		let result: Comment | null = null;
+		let result: Comment;
 		try {
 			result = await this.commentModel.create(input);
 		} catch (err) {
-
+			this.logger.error(`createComment: ${err.message}`, err.stack);
+			throw new BadRequestException(Message.CREATE_FAILED);
 		}
 
 		switch (input.commentGroup) {
@@ -60,7 +63,6 @@ export class CommentService {
 				break;
 		}
 
-		if (!result) throw new InternalServerErrorException(Message.CREATE_FAILED);
 		return result;
 	}
 
