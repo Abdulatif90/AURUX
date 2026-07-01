@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
+import { ObjectId } from 'bson';
 import { AgentPropertiesInquiry,
         AllPropertiesInquiry,
         PropertiesInquiry,
@@ -301,10 +302,12 @@ public async removePropertyByAdmin(propertyId: ObjectId): Promise<Property> {
 		if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
 		return result;
 	}
-  public async propertyStatsEditor(input: StatisticModifier): Promise<Property | null> {
+  public async propertyStatsEditor(input: StatisticModifier<Property>, session?: ClientSession): Promise<Property | null> {
 		const { _id, targetKey, modifier } = input;
+		const inc: Record<string, number> = {};
+		inc[targetKey] = modifier;
 		const updated = await this.propertyModel
-			.findByIdAndUpdate(_id, { $inc: { [targetKey]: modifier } }, { new: true })
+			.findByIdAndUpdate(_id, { $inc: inc }, { new: true, session })
 			.lean()
 			.exec();
 

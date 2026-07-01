@@ -53,4 +53,11 @@ const BoardArticleSchema = new Schema(
 	{ timestamps: true, collection: 'boardArticles' },
 );
 
+// covers the default browse query: filter by status, sorted by newest first
+BoardArticleSchema.index({ articleStatus: 1, createdAt: -1 });
+// covers category-filtered browsing
+BoardArticleSchema.index({ articleStatus: 1, articleCategory: 1, createdAt: -1 });
+// covers a single member's article list (e.g. member profile page)
+BoardArticleSchema.index({ memberId: 1, articleStatus: 1, createdAt: -1 });
+
 export default BoardArticleSchema;

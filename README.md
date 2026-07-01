@@ -26,6 +26,9 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## links
+[http://aurux.uz/] (http://aurux.uz/)
+
 ## Project setup
 
 ```bash

@@ -17,7 +17,7 @@ import { AuthMember } from '../auth/decorators/authMember.decorator';
 import { WithoutGuard } from '../auth/guards/without.guard';
 import { shapeIntoMongoObjectId } from '../../libs/config';
 import { PropertyUpdate } from  '../../libs/dto/property/property.update';
-import { ObjectId } from 'mongoose';
+import { ObjectId } from 'bson';
 import { LikeService } from '../like/like.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 

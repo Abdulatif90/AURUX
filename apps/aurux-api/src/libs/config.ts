@@ -1,9 +1,17 @@
 import { ObjectId } from 'bson';
+import { BadRequestException } from '@nestjs/common';
 import { T } from './types/common';
 import { pipeline } from 'stream';
+import { Message } from './enums/common.enum';
 
-export const shapeIntoMongoObjectId = (target: any) => {
-	return typeof target === 'string' ? new ObjectId(target) : target;
+export const shapeIntoMongoObjectId = (target: string | ObjectId): ObjectId => {
+	if (typeof target !== 'string') return target;
+	if (!ObjectId.isValid(target)) throw new BadRequestException(Message.BAD_REQUEST);
+	return new ObjectId(target);
+};
+
+export const escapeRegExp = (text: string): string => {
+	return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
 export const availableAgentSorts = [

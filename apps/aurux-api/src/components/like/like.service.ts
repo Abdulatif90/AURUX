@@ -1,6 +1,7 @@
 import {BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
+import { ObjectId } from 'bson';
 import { Like, MeLiked } from '../../libs/dto/like/like';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { T } from '../../libs/types/common';
@@ -14,17 +15,17 @@ import { lookupFavorite } from '../../libs/config';
 export class LikeService {
     constructor(@InjectModel('Like') private readonly likeModel: Model<Like>) {}
 
-    public async toggleLike(input: LikeInput): Promise<number> {
+    public async toggleLike(input: LikeInput, session?: ClientSession): Promise<number> {
 		const search: T = { memberId: input.memberId, likeRefId: input.likeRefId },
-			exist = await this.likeModel.findOne(search).exec();
+			exist = await this.likeModel.findOne(search).session(session ?? null).exec();
 		let modifier = 1;
 
 		if (exist) {
-			await this.likeModel.findOneAndDelete(search).exec();
+			await this.likeModel.findOneAndDelete(search).session(session ?? null).exec();
 			modifier = -1;
 		} else {
 			try {
-				await this.likeModel.create(input);
+				await this.likeModel.create([input], { session });
 			} catch (err) {
 				console.log('ERROR on service model of toggleLike', err.message);
 				throw new BadRequestException(Message.CREATE_FAILED);

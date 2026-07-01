@@ -1,7 +1,7 @@
 // Update the import path below if the actual location is different
 import { MemberAuthType, MemberType, MemberStatus } from  '../../enums/member.enum';
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsIn, IsNotEmpty, IsOptional, Length, Min } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, Length, Max, Min } from 'class-validator';
 import { availableAgentSorts, availableMemberSorts } from '../../config';
 import { Direction } from '../../enums/common.enum';
 
@@ -59,6 +59,7 @@ export class AgentsInquiry {
 
 	@IsNotEmpty()
 	@Min(1)
+	@Max(100)
 	@Field(() => Int)
 	limit: number;
 
@@ -88,7 +89,7 @@ class MISearch {
   @Field(() => MemberType, { nullable: true})
   memberType?: MemberType
 
-	@IsNotEmpty()
+	@IsOptional()
 	@Field(() => String, { nullable: true })
 	text?: string;
 }
@@ -102,6 +103,7 @@ export class MembersInquiry {
 
 	@IsNotEmpty()
 	@Min(1)
+	@Max(100)
 	@Field(() => Int)
 	limit: number;
 

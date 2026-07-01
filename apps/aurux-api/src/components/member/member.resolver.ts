@@ -9,7 +9,7 @@ import { MemberType } from '../../libs/enums/member.enum';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
-import { ObjectId } from 'mongoose';
+import { ObjectId } from 'bson';
 import { getSerialForImage, shapeIntoMongoObjectId, validMimeTypes } from '../../libs/config';
 import { WithoutGuard } from '../auth/guards/without.guard';
 import { Message } from '../../libs/enums/common.enum';
@@ -24,7 +24,6 @@ export class MemberResolver {
     @Mutation(() => Member)
 	 	public async signup(@Args('input') input: MemberInput): Promise<Member> {
         console.log('Mutation: signup');
-        console.log('MemberInput', input);
         return await this.memberService.signup(input);
     }
 
@@ -61,7 +60,7 @@ export class MemberResolver {
 
     @UseGuards(WithoutGuard)
     @Query(() => Member)
-        public async getMember(@Args('memberId') input: string, memberId: ObjectId): Promise<Member> {
+        public async getMember(@Args('memberId') input: string, @AuthMember('_id') memberId: ObjectId): Promise<Member> {
             console.log("Query: getMember")
             const targetId = shapeIntoMongoObjectId(input);
             return await this.memberService.getMember(memberId, targetId);
@@ -69,7 +68,7 @@ export class MemberResolver {
 
     @UseGuards(WithoutGuard)
     @Query(() => Members)
-    public async getAgents(@Args('input') input: AgentsInquiry, memberId: ObjectId): Promise<Members> {
+    public async getAgents(@Args('input') input: AgentsInquiry, @AuthMember('_id') memberId: ObjectId): Promise<Members> {
     console.log('Query: getAgents');
     return await this.memberService.getAgents(memberId, input);
 	}
@@ -120,6 +119,7 @@ export class MemberResolver {
     if (!filename) throw new BadRequestException(Message.UPLOAD_FAILED);
     const validMime = validMimeTypes.includes(mimetype);
     if (!validMime) throw new BadRequestException(Message.PROVIDE_ALLOWED_FORMAT);
+    if (!/^[a-z0-9_-]+$/i.test(target)) throw new BadRequestException(Message.BAD_REQUEST);
 
     const imageName = getSerialForImage(filename);
     const uploadDir = `uploads/${target}`;
@@ -175,6 +175,7 @@ export class MemberResolver {
       if (files.length > 10) {
         throw new BadRequestException('Maximum 10 files allowed');
       }
+      if (!/^[a-z0-9_-]+$/i.test(target)) throw new BadRequestException(Message.BAD_REQUEST);
 
       const uploadedImages: string[] = [];
       const uploadDir = `uploads/${target}`;

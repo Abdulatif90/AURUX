@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty } from 'class-validator';
-import { ObjectId } from 'mongoose';
+import { ObjectId } from 'bson';
 import { LikeGroup } from '../../enums/like.enum';
 
 @InputType()

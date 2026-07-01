@@ -5,7 +5,7 @@ import { UseGuards } from '@nestjs/common';
 import { BoardArticle, BoardArticles } from '../../libs/dto/board-article/board-article';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
 import { AllBoardArticlesInquiry, BoardArticleInput, BoardArticlesInquiry } from '../../libs/dto/board-article/board-article.input';
-import { ObjectId } from 'mongoose';
+import { ObjectId } from 'bson';
 import { Query } from '@nestjs/graphql';
 import { shapeIntoMongoObjectId } from '../../libs/config';
 import { WithoutGuard } from '../auth/guards/without.guard';
@@ -25,7 +25,6 @@ constructor(private readonly boardArticleService: BoardArticleService) {}
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<BoardArticle> {
 		console.log('Mutation: createBoardArticle');
-		input.memberId = memberId; // not coming from frontend, exists only in backend
 		return await this.boardArticleService.createBoardArticle(memberId, input);
 	}
 
@@ -33,7 +32,7 @@ constructor(private readonly boardArticleService: BoardArticleService) {}
 	@Query((returns) => BoardArticle)
 	public async getBoardArticle(
 		@Args('articleId') input: string,
-		@AuthMember('_id') memberId: ObjectId,
+		@AuthMember('_id') memberId: ObjectId | null,
 	): Promise<BoardArticle> {
 		console.log('Query: getBoardArticle');
 		const articleId = shapeIntoMongoObjectId(input);

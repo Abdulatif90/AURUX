@@ -3,7 +3,7 @@ import { IsIn, IsInt, IsNotEmpty, IsOptional, Length, Min, IsArray, ArrayMinSize
 import { PropertyLocation, PropertyStatus, PropertyType } from '../../enums/property.enum';
 import { availableOptions, availablePropertySorts } from '../../config';
 import { Direction } from '../../enums/common.enum';
-import { ObjectId } from 'mongoose';
+import { ObjectId } from 'bson';
 
 
 @InputType()

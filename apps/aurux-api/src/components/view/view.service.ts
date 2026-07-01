@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, ObjectId } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { MongoServerError } from 'mongodb';
+import { ObjectId } from 'bson';
 import { View } from  '../../libs/dto/view/view';
 import { ViewInput } from   '../../libs/dto/view/view.input';
 import { T } from '../../libs/types/common';
@@ -9,41 +11,23 @@ import { OrdinaryInquiry } from '../../libs/dto/property/property.input';
 import { Properties } from '../../libs/dto/property/property';
 import { lookupVisit } from '../../libs/config';
 
+const DUPLICATE_KEY_ERROR_CODE = 11000;
+
 @Injectable()
 export class ViewService {
 	constructor(@InjectModel('View') private readonly viewModel: Model<View>) {}
 
 	public async recordView(input: ViewInput): Promise<View | null> {
-		console.log('ViewService.recordView called with:', {
-			memberId: input.memberId,
-			viewRefId: input.viewRefId,
-			viewGroup: input.viewGroup
-		});
-
-		const viewExist = await this.checkViewExistence(input);
-		if (!viewExist) {
-			console.log(' - New View Insert - Creating new view record');
-			const newViewData = {
+		try {
+			return await this.viewModel.create({
 				...input,
-				memberId: new Types.ObjectId(input.memberId as any),
-				viewRefId: new Types.ObjectId(input.viewRefId as any),
-			};
-			const newView = await this.viewModel.create(newViewData);
-			console.log(' - New View Created Successfully:', newView._id);
-			return newView;
-		} else {
-			console.log(' - View Already Exists - Skipping increment');
+				memberId: new Types.ObjectId(input.memberId),
+				viewRefId: new Types.ObjectId(input.viewRefId),
+			});
+		} catch (err: unknown) {
+			if (err instanceof MongoServerError && err.code === DUPLICATE_KEY_ERROR_CODE) return null;
+			throw err;
 		}
-		return null;
-	}
-	public async checkViewExistence(input: ViewInput): Promise<View | null> {
-		const { memberId, viewRefId, viewGroup } = input;
-		const search: T = {
-			memberId: new Types.ObjectId(memberId as any),
-			viewRefId: new Types.ObjectId(viewRefId as any),
-			viewGroup: viewGroup,
-		};
-		return await this.viewModel.findOne(search).exec();
 	}
 
   // getVisitedProperties

@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsOptional, Length } from 'class-validator';
 import { BoardArticleStatus } from '../../enums/board-article.enum';
-import { ObjectId } from 'mongoose';
+import { ObjectId } from 'bson';
 
 @InputType()
 export class BoardArticleUpdate {

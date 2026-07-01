@@ -1,7 +1,8 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { Injectable, BadRequestException, InternalServerErrorException} from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel} from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { ClientSession, FilterQuery, Model } from 'mongoose';
+import { ObjectId } from 'bson';
 import { Member, Members } from  '../../libs/dto/member/member';
 import { Follower, Following } from '../../libs/dto/follow/follow';
 import { MeFollowed } from '../../libs/dto/follow/follow';
@@ -11,12 +12,12 @@ import { AgentsInquiry, LoginInput, MemberInput, MembersInquiry } from '../../li
 import { MemberStatus, MemberType } from '../../libs/enums/member.enum';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { LikeGroup } from '../../libs/enums/like.enum';
-import { StatisticModifier, T } from '../../libs/types/common';
+import { StatisticModifier } from '../../libs/types/common';
 import { ViewGroup } from '../../libs/enums/view.enum';
 import { AuthService } from '../auth/auth.service';
 import { ViewService } from   '../view/view.service';
 import { LikeService } from '../like/like.service';
-import { lookupAuthMemberLiked } from '../../libs/config';
+import { escapeRegExp, lookupAuthMemberLiked } from '../../libs/config';
 
 
 
@@ -51,9 +52,9 @@ export class MemberService {
 		  .exec();
 
 		if (!response || response.memberStatus === MemberStatus.DELETED) {
-      throw new InternalServerErrorException(Message.NO_MEMBER_NICK);
+			throw new NotFoundException(Message.NO_MEMBER_NICK);
 		} else if (response.memberStatus === MemberStatus.BLOCKED) {
-		  throw new InternalServerErrorException(Message.BLOCKED_USER);
+			throw new ForbiddenException(Message.BLOCKED_USER);
 		}
 
 		if (!response.memberPassword) {
@@ -64,31 +65,34 @@ export class MemberService {
   .comparePasswords(input.memberPassword, response.memberPassword);
 
 		if (!isMatch) {
-		  throw new InternalServerErrorException(Message.WRONG_PASSWORD);
+			throw new UnauthorizedException(Message.WRONG_PASSWORD);
 		}
     response.accessToken = await this.authService.createToken(response);
 		return response;
 	}
 
   public async updateMember(memberId: ObjectId, input: MemberUpdate): Promise<Member> {
+		if (input.memberPassword) {
+			input.memberPassword = await this.authService.hashPassword(input.memberPassword);
+		}
 		const result: Member | null = await this.memberModel
 			.findOneAndUpdate({ _id: memberId, memberStatus: MemberStatus.ACTIVE }, input, { new: true })
 			.exec();
-		if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
+		if (!result) throw new NotFoundException(Message.UPDATE_FAILED);
 		result.accessToken = await this.authService.createToken(result);
 		return result;
 	}
 
 
 		public async getMember(memberId: ObjectId | null, targetId: ObjectId): Promise<Member> {
-		const search: T = {
+		const search: FilterQuery<Member> = {
 			_id: targetId,
 			memberStatus: {
 				$in: [MemberStatus.ACTIVE, MemberStatus.BLOCKED],
 			},
 		};
-		const targetMember: any= await this.memberModel.findOne(search).lean().exec();
-		if (!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+		const targetMember: Member | null = await this.memberModel.findOne(search).lean().exec();
+		if (!targetMember) throw new NotFoundException(Message.NO_DATA_FOUND);
 
     if (memberId) {
 			const viewInput = { memberId: memberId, viewRefId: targetId, viewGroup: ViewGroup.MEMBER };
@@ -107,23 +111,23 @@ export class MemberService {
     const likeInput = { memberId: memberId, likeRefId: targetId, likeGroup: LikeGroup.MEMBER };
 			targetMember.meLiked = await this.likeService.checkLikeExistence(likeInput as LikeInput);
 			//meFollowed
-     targetMember.MeFollowed = await this.checkSubscription(memberId, targetId)
+     targetMember.meFollowed = await this.checkSubscription(memberId, targetId)
 
 		}
     return targetMember;
 	}
 
-  private async checkSubscription(followingId: ObjectId, followerId): Promise<MeFollowed[]> {
+  private async checkSubscription(followingId: ObjectId, followerId: ObjectId): Promise<MeFollowed[]> {
 		  const result = await this.followModel.findOne({ followerId: followerId, followingId: followingId }).exec();
 		  return result ? [{ followerId: followerId, followingId: followingId, myFollowing: true }] : [];
 	}
 
   public async getAgents(memberId: ObjectId, input: AgentsInquiry): Promise<Members> {
 		const { text } = input.search|| {};
-		const match: T = { memberType: MemberType.AGENT, memberStatus: MemberStatus.ACTIVE };
-		const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
+		const match: FilterQuery<Member> = { memberType: MemberType.AGENT, memberStatus: MemberStatus.ACTIVE };
+		const sort: Record<string, Direction> = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
 
-		if (text) match.memberNick = { $regex: new RegExp(text, 'i') };
+		if (text) match.memberNick = { $regex: new RegExp(escapeRegExp(text), 'i') };
 		console.log('match', match);
 
 		const result = await this.memberModel
@@ -141,13 +145,12 @@ export class MemberService {
 				},
 			])
 			.exec();
-		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 		return result[0];
 	}
 
   public async likeTargetMember(memberId: ObjectId, likeRefId: ObjectId): Promise<Member> {
 		const target: Member | null = await this.memberModel.findOne({ _id: likeRefId, memberStatus: MemberStatus.ACTIVE });
-		if (!target) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+		if (!target) throw new NotFoundException(Message.NO_DATA_FOUND);
 
 		const input: LikeInput = {
 			memberId: memberId,
@@ -170,23 +173,26 @@ export class MemberService {
 
 
 	public async updateMemberByAdmin(input: MemberUpdate): Promise<Member> {
+		if (input.memberPassword) {
+			input.memberPassword = await this.authService.hashPassword(input.memberPassword);
+		}
 		const result: Member | null = await this.memberModel
       .findOneAndUpdate({ _id: input._id}, input, {new: true})
       .exec();
-      if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
+      if (!result) throw new NotFoundException(Message.UPDATE_FAILED);
     return result;
 	}
 
 	public async getAllMembersByAdmin(input: MembersInquiry): Promise<Member> {
     const {memberStatus, memberType, text} = input.search;
-    const match: T = {};
-    const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
+    const match: FilterQuery<Member> = {};
+    const sort: Record<string, Direction> = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
 
 
     if (memberStatus) match.memberStatus = memberStatus;
     if (memberType) match.memberType = memberType;
 
-     if (text) match.memberNick = { $regex: new RegExp(text, 'i') };
+     if (text) match.memberNick = { $regex: new RegExp(escapeRegExp(text), 'i') };
     console.log('match', match);
 
     const result = await this.memberModel
@@ -202,14 +208,14 @@ export class MemberService {
       ])
       .exec();
 
-    if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
     return result[0];
 	}
-  public async memberStatsEditor(input: StatisticModifier): Promise<Member | null> {
-		console.log('executed');
+  public async memberStatsEditor(input: StatisticModifier<Member>, session?: ClientSession): Promise<Member | null> {
 		const { _id, targetKey, modifier } = input;
+		const inc: Record<string, number> = {};
+		inc[targetKey] = modifier;
 		return (
-			await this.memberModel.findByIdAndUpdate(_id, { $inc: { [targetKey]: modifier } }, { new: true }).exec()
+			await this.memberModel.findByIdAndUpdate(_id, { $inc: inc }, { new: true, session }).exec()
 		);
 	}
 }
