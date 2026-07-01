@@ -118,4 +118,7 @@ const MemberSchema = new Schema(
 	{ timestamps: true, collection: 'members' },
 );
 
+MemberSchema.index({ memberType: 1, memberStatus: 1 });
+MemberSchema.index({ memberStatus: 1 });
+
 export default MemberSchema;

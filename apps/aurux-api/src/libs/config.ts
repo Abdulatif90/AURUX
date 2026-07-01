@@ -131,19 +131,25 @@ export const lookupAuthMemberFollowed = (followerId: T, followingId: string) => 
 
 export const lookupMember = {
 	$lookup: {
-	  from: 'members',
-	  localField: 'memberId',
-	  foreignField: '_id',
-	  as: 'memberData',
+		from: 'members',
+		let: { memberId: '$memberId' },
+		pipeline: [
+			{ $match: { $expr: { $eq: ['$_id', '$$memberId'] } } },
+			{ $project: { memberPassword: 0 } },
+		],
+		as: 'memberData',
 	},
-  };
+};
 
 
 export const lookupFollowingData = {
 	$lookup: {
 		from: 'members',
-		localField: 'followingId',
-		foreignField: '_id',
+		let: { followingId: '$followingId' },
+		pipeline: [
+			{ $match: { $expr: { $eq: ['$_id', '$$followingId'] } } },
+			{ $project: { memberPassword: 0 } },
+		],
 		as: 'followingData',
 	},
 };
@@ -151,8 +157,11 @@ export const lookupFollowingData = {
 export const lookupFollowerData = {
 	$lookup: {
 		from: 'members',
-		localField: 'followerId',
-		foreignField: '_id',
+		let: { followerId: '$followerId' },
+		pipeline: [
+			{ $match: { $expr: { $eq: ['$_id', '$$followerId'] } } },
+			{ $project: { memberPassword: 0 } },
+		],
 		as: 'followerData',
 	},
 };
@@ -161,8 +170,11 @@ export const lookupFollowerData = {
 export const lookupFavorite = {
 	$lookup: {
 		from: 'members',
-		localField: 'favoriteProperty.memberId',
-		foreignField: '_id',
+		let: { memberId: '$favoriteProperty.memberId' },
+		pipeline: [
+			{ $match: { $expr: { $eq: ['$_id', '$$memberId'] } } },
+			{ $project: { memberPassword: 0 } },
+		],
 		as: 'favoriteProperty.memberData',
 	},
 };
@@ -171,8 +183,11 @@ export const lookupFavorite = {
 export const lookupVisit = {
 	$lookup: {
 		from: 'members',
-		localField: 'visitedProperty.memberId',
-		foreignField: '_id',
+		let: { memberId: '$visitedProperty.memberId' },
+		pipeline: [
+			{ $match: { $expr: { $eq: ['$_id', '$$memberId'] } } },
+			{ $project: { memberPassword: 0 } },
+		],
 		as: 'visitedProperty.memberData',
 	},
 };

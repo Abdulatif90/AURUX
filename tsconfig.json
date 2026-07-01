@@ -9,6 +9,7 @@
     "target": "es2023",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "./apps",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,

@@ -96,13 +96,10 @@ export class MemberService {
 
     if (memberId) {
 			const viewInput = { memberId: memberId, viewRefId: targetId, viewGroup: ViewGroup.MEMBER };
-			console.log('Member view check for:', { memberId, targetId });
 			const newView = await this.viewService.recordView(viewInput);
 			if (newView) {
-				console.log('Incrementing member views for targetId:', targetId);
 				await this.memberModel.findOneAndUpdate(search, { $inc: { memberViews: 1 } }, { new: true }).exec();
 				targetMember.memberViews++;
-				console.log('Member view count updated to:', targetMember.memberViews);
 			}
 
     //meLiked
@@ -128,7 +125,6 @@ export class MemberService {
 		const sort: Record<string, Direction> = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
 
 		if (text) match.memberNick = { $regex: new RegExp(escapeRegExp(text), 'i') };
-		console.log('match', match);
 
 		const result = await this.memberModel
 			.aggregate([
@@ -193,7 +189,6 @@ export class MemberService {
     if (memberType) match.memberType = memberType;
 
      if (text) match.memberNick = { $regex: new RegExp(escapeRegExp(text), 'i') };
-    console.log('match', match);
 
     const result = await this.memberModel
       .aggregate([
