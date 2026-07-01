@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsNotEmpty, Length, IsOptional, IsInt, Min } from 'class-validator';
+import { IsMongoId, IsNotEmpty, Length, IsOptional, IsInt, Min } from 'class-validator';
 import { MemberType, MemberStatus } from '../../enums/member.enum';
 import { ObjectId } from 'bson';
 import { PropertyLocation, PropertyStatus, PropertyType } from '../../enums/property.enum';
@@ -7,8 +7,9 @@ import { PropertyLocation, PropertyStatus, PropertyType } from '../../enums/prop
 @InputType()
 export class PropertyUpdate {
     @IsNotEmpty()
+    @IsMongoId()
     @Field(() => String)
-    _id: ObjectId; // question to be asked
+    _id: ObjectId;
 
     @IsOptional()
     @Field(() => PropertyType, { nullable: true })

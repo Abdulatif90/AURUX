@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { MongoServerError } from 'mongodb';
 import { ObjectId } from 'bson';
 import { View } from  '../../libs/dto/view/view';
 import { ViewInput } from   '../../libs/dto/view/view.input';
-import { T } from '../../libs/types/common';
 import { ViewGroup } from '../../libs/enums/view.enum';
 import { OrdinaryInquiry } from '../../libs/dto/property/property.input';
 import { Properties } from '../../libs/dto/property/property';
@@ -34,9 +33,9 @@ export class ViewService {
 
 	public async getVisitedProperties(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
 		const { page, limit } = input;
-		const match: T = { viewGroup: ViewGroup.PROPERTY, memberId: memberId };
+		const match: FilterQuery<View> = { viewGroup: ViewGroup.PROPERTY, memberId: memberId };
 
-		const data: T = await this.viewModel
+		const data: any[] = await this.viewModel
 			.aggregate([
 				{ $match: match },
 				{ $sort: { updatedAt: -1 } },
@@ -64,7 +63,6 @@ export class ViewService {
 			])
 			.exec();
 
-		console.log('data:', data);
 		const result: Properties = { list: [], metaCounter: data[0].metaCounter };
 		result.list = data[0].list.map((ele) => ele.visitedProperty);
 		return result;

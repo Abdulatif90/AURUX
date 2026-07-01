@@ -1,10 +1,9 @@
-import {BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model } from 'mongoose';
+import { ClientSession, FilterQuery, Model } from 'mongoose';
 import { ObjectId } from 'bson';
 import { Like, MeLiked } from '../../libs/dto/like/like';
 import { LikeInput } from '../../libs/dto/like/like.input';
-import { T } from '../../libs/types/common';
 import { Message } from '../../libs/enums/common.enum';
 import { OrdinaryInquiry } from '../../libs/dto/property/property.input';
 import { Properties } from '../../libs/dto/property/property';
@@ -13,10 +12,11 @@ import { lookupFavorite } from '../../libs/config';
 
 @Injectable()
 export class LikeService {
+    private readonly logger = new Logger(LikeService.name);
     constructor(@InjectModel('Like') private readonly likeModel: Model<Like>) {}
 
     public async toggleLike(input: LikeInput, session?: ClientSession): Promise<number> {
-		const search: T = { memberId: input.memberId, likeRefId: input.likeRefId },
+		const search: FilterQuery<Like> = { memberId: input.memberId, likeRefId: input.likeRefId },
 			exist = await this.likeModel.findOne(search).session(session ?? null).exec();
 		let modifier = 1;
 
@@ -27,11 +27,10 @@ export class LikeService {
 			try {
 				await this.likeModel.create([input], { session });
 			} catch (err) {
-				console.log('ERROR on service model of toggleLike', err.message);
+				this.logger.error(`toggleLike: ${err.message}`, err.stack);
 				throw new BadRequestException(Message.CREATE_FAILED);
 			}
 		}
-		console.log(`- Like Modifier ${modifier} -`);
 		return modifier;
 	}
 
@@ -45,9 +44,9 @@ export class LikeService {
   
 	public async getFavoriteProperties(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
 		const { page, limit } = input;
-		const match: T = { likeGroup: LikeGroup.PROPERTY, memberId: memberId };
+		const match: FilterQuery<Like> = { likeGroup: LikeGroup.PROPERTY, memberId: memberId };
 
-		const data: T = await this.likeModel
+		const data: any[] = await this.likeModel
 			.aggregate([
 				{ $match: match },
 				{ $sort: { updatedAt: -1 } },
@@ -75,7 +74,6 @@ export class LikeService {
 			])
 			.exec();
 
-		console.log('data:', data);
 		const result: Properties = {list: [], metaCounter: data[0].metaCounter}
 		result.list = data[0].list.map((ele) => ele.favoriteProperty)
 		return result;

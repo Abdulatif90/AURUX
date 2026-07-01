@@ -18,7 +18,6 @@ import { WithoutGuard } from '../auth/guards/without.guard';
 import { shapeIntoMongoObjectId } from '../../libs/config';
 import { PropertyUpdate } from  '../../libs/dto/property/property.update';
 import { ObjectId } from 'bson';
-import { LikeService } from '../like/like.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Resolver()
@@ -32,8 +31,6 @@ export class PropertyResolver {
 		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Property> {
 		console.log('Mutation: createProperty');
-		console.log('Input received:', JSON.stringify(input, null, 2));
-		console.log('Property images:', input.propertyImages);
 		input.memberId = memberId; // not coming from frontend, exists only in backend
 		return await this.propertyService.createProperty(input);
 	}	@UseGuards(WithoutGuard)
@@ -130,6 +127,7 @@ export class PropertyResolver {
 		@Args('input') input: PropertyUpdate,
 	): Promise<Property> {
 		console.log('Query: updatePropertyByAdmin', input);
+		input._id = shapeIntoMongoObjectId(input._id);
 		return await this.propertyService.updatePropertyByAdmin(input);
 	}
   @Roles(MemberType.ADMIN)

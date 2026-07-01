@@ -33,10 +33,10 @@ export class Member {
 	memberImage: string;
 
 	@Field(() => String, { nullable: true })
-	memberAddress: string;
+	memberAddress: string | null;
 
 	@Field(() => String , { nullable: true })
-	memberDesc: string;
+	memberDesc: string | null;
 
 	@Field(() => Int)
 	memberProperties: number;
