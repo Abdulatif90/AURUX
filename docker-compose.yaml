@@ -1,0 +1,44 @@
+#yangi versionda versiya ko'rsatilmaydi
+#version: '3.3'
+
+services:
+  aurux-api:
+    container_name: aurux-api
+    restart: always
+    image: node:20.10.0
+    ports:
+      - 4001:3005
+    volumes:
+      - ./:/usr/src/aurux
+      - aurux-api-modules:/usr/src/aurux/node_modules
+    working_dir: /usr/src/aurux
+
+    networks:
+      - monorepo-network
+  #for monorepo production
+    command: bash -c "npm install && npm run build && npm run start:prod"
+
+  aurux-batch:
+    container_name: aurux-batch
+    restart: unless-stopped
+    image: node:20.10.0
+    ports:
+      - 4002:3006
+    volumes:
+      - ./:/usr/src/aurux
+      - aurux-batch-modules:/usr/src/aurux/node_modules
+    working_dir: /usr/src/aurux
+
+    networks:
+      - monorepo-network
+
+    command: bash -c "npm install && npm run build &&  npm run start:prod:batch"
+
+
+networks:
+  monorepo-network:
+     driver: bridge
+
+volumes:
+  aurux-api-modules:
+  aurux-batch-modules:
